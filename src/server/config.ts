@@ -992,6 +992,18 @@ export function resolveConfig(args: string[]): { config: ServerConfig; sources: 
   config.allowGitWrites = false;
   config.allowPluginExecute = false;
   config.allowPluginRawWrites = false;
+  // --- READ-ONLY FORK: zusaetzlich fest gesperrte Actions -------------------
+  // Aendern Zustand im SAP-System (Traces, Formatter-Einstellungen, Quickfix).
+  // Nicht per .env oder Startparameter entfernbar.
+  const FORCED_DENY_ACTIONS = [
+    'SAPDiagnose.trace_start',
+    'SAPDiagnose.trace_cancel',
+    'SAPDiagnose.set_sql_trace_state',
+    'SAPDiagnose.apply_quickfix',
+    'SAPLint.set_formatter_settings',
+  ];
+  validateDenyActions(FORCED_DENY_ACTIONS);
+  config.denyActions = [...new Set([...config.denyActions, ...FORCED_DENY_ACTIONS])];
 
   // ── Lint ───────────────────────────────────────────────────────────
   config.abaplintConfig = resolveOptionalStr('abaplint-config', 'SAP_ABAPLINT_CONFIG', 'abaplintConfig');
