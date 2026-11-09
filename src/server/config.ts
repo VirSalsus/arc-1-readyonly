@@ -969,6 +969,30 @@ export function resolveConfig(args: string[]): { config: ServerConfig; sources: 
     'allowPluginRawWrites',
   );
 
+  // --- READ-ONLY FORK: Schreibzugriff ist fest abgeschaltet -----------------
+  // Gilt unabhaengig von .env, CLI-Flags und API-Key-Profilen.
+  // Dieser Block darf nicht entfernt oder abgeschwaecht werden.
+  const requestedWriteFlags = [
+    ['SAP_ALLOW_WRITES', config.allowWrites],
+    ['SAP_ALLOW_TRANSPORT_WRITES', config.allowTransportWrites],
+    ['SAP_ALLOW_GIT_WRITES', config.allowGitWrites],
+    ['SAP_ALLOW_PLUGIN_EXECUTE', config.allowPluginExecute],
+    ['SAP_ALLOW_PLUGIN_RAW_WRITES', config.allowPluginRawWrites],
+  ]
+    .filter(([, value]) => value === true)
+    .map(([name]) => name);
+  if (requestedWriteFlags.length > 0) {
+    throw new Error(
+      `Dieser ARC-1-Fork ist read-only. Folgende Schreib-Flags duerfen nicht gesetzt werden: ${requestedWriteFlags.join(', ')}. ` +
+        'Bitte aus .env bzw. den Startparametern entfernen.',
+    );
+  }
+  config.allowWrites = false;
+  config.allowTransportWrites = false;
+  config.allowGitWrites = false;
+  config.allowPluginExecute = false;
+  config.allowPluginRawWrites = false;
+
   // ── Lint ───────────────────────────────────────────────────────────
   config.abaplintConfig = resolveOptionalStr('abaplint-config', 'SAP_ABAPLINT_CONFIG', 'abaplintConfig');
   config.lintBeforeWrite = resolveBool('lint-before-write', 'SAP_LINT_BEFORE_WRITE', true, 'lintBeforeWrite');
