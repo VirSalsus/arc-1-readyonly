@@ -9,7 +9,6 @@ import { readFileSync } from 'node:fs';
 import { writeFile } from 'node:fs/promises';
 import { pathToFileURL } from 'node:url';
 import { Command, CommanderError, Option } from 'commander';
-import { config as loadDotEnv } from 'dotenv';
 import { appendAunitJunitDiagnostic, parseNativeJunitSummary } from './adt/aunit.js';
 import { AdtClient } from './adt/client.js';
 import type { AdtClientConfig } from './adt/config.js';
@@ -40,6 +39,7 @@ import { setCachedDiscovery, setCachedFeatures } from './handlers/feature-cache.
 import { normalizeObjectType } from './handlers/object-types.js';
 import { errorResult, type ToolResult } from './handlers/shared.js';
 import type { LintResult } from './lint/lint.js';
+import { loadInstallEnv } from './load-env.js';
 import { sanitizeArgs } from './server/audit.js';
 import { assertNoRemovedCliFlags, CLI_CONFIG_OPTION_SPECS, resolveConfig } from './server/config.js';
 import { generateRequestId } from './server/context.js';
@@ -57,7 +57,7 @@ import {
 import { FileSink } from './server/sinks/file.js';
 import type { ConfigSource, ServerConfig } from './server/types.js';
 
-loadDotEnv({ quiet: true });
+loadInstallEnv();
 
 export type CliExitCode = 0 | 1 | 2 | 3;
 
